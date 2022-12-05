@@ -10,7 +10,8 @@ export function Jar(props: JarProps): JSX.Element {
 	const audio = useRef(null);
 
 	function play() {
-		audio.current?.play();
+		const audioEl = audio.current as null | HTMLAudioElement;
+		audioEl?.play();
 	}
 
 	return (
