@@ -1,9 +1,7 @@
 import { Jar } from '../Jar/Jar';
 import styles from './Jamophone.module.css';
 
-type JamophoneProps = {};
-
-export function Jamophone(props: JamophoneProps): JSX.Element {
+export function Jamophone(): JSX.Element {
 	return (
 		<div className={styles.Jamophone}>
 			<Jar note="C" />
