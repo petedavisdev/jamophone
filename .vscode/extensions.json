@@ -1,0 +1,9 @@
+{
+	"recommendations": [
+		"formulahendry.auto-rename-tag",
+		"clinyong.vscode-css-modules",
+		"esbenp.prettier-vscode",
+		"dbaeumer.vscode-eslint"
+	]
+}
+

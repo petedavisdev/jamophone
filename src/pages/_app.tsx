@@ -1,0 +1,9 @@
+import '../styles/base.css';
+import '../styles/utils.css';
+
+import type { AppProps } from 'next/app';
+
+export default function App({ Component, pageProps }: AppProps) {
+	return <Component {...pageProps} />;
+}
+

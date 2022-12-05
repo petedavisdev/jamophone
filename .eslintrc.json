@@ -1,0 +1,21 @@
+{
+	"root": true,
+	"extends": [
+		"next",
+		"next/core-web-vitals",
+		"plugin:@typescript-eslint/recommended",
+		"prettier/@typescript-eslint",
+		"plugin:prettier/recommended",
+		"plugin:yaml/recommended"
+	],
+	"plugins": ["@typescript-eslint", "prettier", "yaml"],
+	"ignorePatterns": [".generated/**/*", "**/*.d.ts", "**/*.js", "**/*.test.ts"],
+	"rules": {
+		"no-unused-vars": "off",
+		"@typescript-eslint/no-unused-vars": "error",
+		"no-extra-parens": "off",
+		"no-mixed-spaces-and-tabs": "warn",
+		"jsx-quotes": ["error", "prefer-double"]
+	}
+}
+
