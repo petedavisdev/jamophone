@@ -1,0 +1,9 @@
+.Jar img {
+	display: inline-block;
+	width: 10vw;
+	transition: transform 0.5s;
+}
+
+.Jar img:hover {
+	transform: scale(1.1);
+}

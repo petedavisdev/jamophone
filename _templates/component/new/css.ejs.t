@@ -1,5 +1,5 @@
 ---
-to: src/components/<%= h.changeCase.pascal(name) %>/<%= h.changeCase.pascal(name) %>module.css
+to: src/components/<%= h.changeCase.pascal(name) %>/<%= h.changeCase.pascal(name) %>.module.css
 ---
 
 .<%= ComponentName = h.changeCase.pascal(name) %> {
