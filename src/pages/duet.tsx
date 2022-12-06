@@ -14,29 +14,30 @@ export default function Duet(): JSX.Element {
 
 	function createOffer() {
 		const localConnection = new RTCPeerConnection();
+		const dataChannel = localConnection.createDataChannel('sendChannel');
+
 		localConnection.onicecandidate = () => {
-			console.log(' NEW ice candidate!! on localconnection reprinting SDP ');
+			console.log('NEW ice candidate!! on localconnection reprinting SDP ');
 			console.log(JSON.stringify(localConnection.localDescription));
 		};
 
-		const sendChannel = localConnection.createDataChannel('sendChannel');
-		sendChannel.onopen = () => console.log('sendChannel open');
-		sendChannel.onclose = () => console.log('sendChannel close');
-		sendChannel.onmessage = (event) => console.log('sendChannel message received ' + event.data);
+		dataChannel.onopen = () => console.log('sendChannel open');
+		dataChannel.onclose = () => console.log('sendChannel close');
+		dataChannel.onmessage = (event) => alert('sendChannel message received ' + event.data);
 
-		localConnection.createOffer().then((description) => {
-			localConnection.setLocalDescription(description);
-			setOffer(description);
+		localConnection.createOffer().then((offerData) => {
+			localConnection.setLocalDescription(offerData);
+			setOffer(offerData);
 		});
 
 		setConnection(localConnection);
-		setChannel(sendChannel);
+		setChannel(dataChannel);
 	}
 
 	function connect(data: FormValues) {
-		if (connection) {
+		if (connection && channel) {
 			connection.setRemoteDescription(JSON.parse(data.answer)).then(() => console.log('done'));
-			channel?.send('hello');
+			channel.send('hello');
 		}
 	}
 
@@ -49,9 +50,7 @@ export default function Duet(): JSX.Element {
 					<button onClick={createOffer}>Start Duet</button>
 				) : (
 					<>
-						<textarea rows={10} readOnly>
-							{JSON.stringify(offer)}
-						</textarea>
+						<textarea rows={10} readOnly value={JSON.stringify(offer)} />
 
 						<form onSubmit={form.handleSubmit(connect)}>
 							<label>

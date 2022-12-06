@@ -20,34 +20,34 @@ export default function Join(): JSX.Element {
 			};
 
 			remoteConnection.ondatachannel = (event) => {
-				const receiveChannel = event.channel;
+				const dataChannel = event.channel;
 
-				receiveChannel.onopen = () => console.log('sendChannel open');
-				receiveChannel.onclose = () => console.log('sendChannel close');
-				receiveChannel.onmessage = (event) =>
-					console.log('sendChannel message received ' + event.data);
+				dataChannel.onopen = () => console.log('Channel opened');
+				dataChannel.onclose = () => console.log('Channel closed');
+				dataChannel.onmessage = (event) => alert('Message received ' + event.data);
 			};
 
 			remoteConnection
 				.setRemoteDescription(JSON.parse(data.offer))
 				.then(() => console.log('remote description set'));
 
-			remoteConnection.createAnswer().then((description) => {
-				remoteConnection.setLocalDescription(description);
-				setAnswer(description);
-			});
+			remoteConnection
+				.createAnswer()
+				.then((answerData) => {
+					remoteConnection.setLocalDescription(answerData);
+					setAnswer(answerData);
+				})
+				.then(() => console.log('Answer created'));
 		}
 	}
 
 	return (
 		<div className="container">
 			<main className="main">
-				<h1>Jamophone Duet</h1>
+				<h1>Jamophone Join</h1>
 
 				{answer ? (
-					<textarea rows={10} readOnly>
-						{JSON.stringify(answer)}
-					</textarea>
+					<textarea rows={10} readOnly value={JSON.stringify(answer)} />
 				) : (
 					<form onSubmit={form.handleSubmit(createAnswer)}>
 						<label>
