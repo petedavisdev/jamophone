@@ -11,7 +11,8 @@ export function Jamophone(): JSX.Element {
 			<Jar note="G" />
 			<Jar note="A" />
 			<Jar note="B" />
-			<Jar note="M" image="images/marmalade.png" />
+			<Jar note="M" image="/images/marmalade.png" />
 		</div>
 	);
 }
+
