@@ -6,6 +6,8 @@ export default function Start(): JSX.Element {
 	const textRef = useRef<HTMLTextAreaElement>(null);
 	const connection = useRef<RTCPeerConnection>();
 	const [localDescription, setLocalDescription] = useState<RTCSessionDescriptionInit | undefined>();
+	const [start, setStart] = useState(false);
+	const [join, setJoin] = useState(false);
 
 	useEffect(() => {
 		navigator.mediaDevices
@@ -97,24 +99,32 @@ export default function Start(): JSX.Element {
 	return (
 		<div className="container">
 			<main className="main">
-				<h1>Start</h1>
-				<section>
-					<video autoPlay ref={localVideoRef} />
-					<button onClick={createOffer}>Create offer</button>
-					<button onClick={createAnswer}>Create answer</button>
+				<video autoPlay ref={localVideoRef} />
+				<video autoPlay ref={remoteVideoRef} />
 
-					<p>
-						<span className="truncatedText">{JSON.stringify(localDescription)}</span>
-						<button onClick={copyLocalDescription}>Copy local description</button>
-					</p>
+				{!start && !join && (
+					<>
+						<button onClick={() => setStart(true)}>Start</button>
+						<button onClick={() => setJoin(true)}>Join</button>
+					</>
+				)}
 
-					<textarea cols={30} rows={10} ref={textRef} />
-					<button onClick={setRemoteDescription}>Set remote description</button>
-					<button onClick={addCandidate}>Add candidate</button>
-				</section>
-				<section>
-					<video autoPlay ref={remoteVideoRef} />
-				</section>
+				{start && <button onClick={createOffer}>Create offer</button>}
+
+				{join && <button onClick={createAnswer}>Create answer</button>}
+
+				{(start || join) && (
+					<section>
+						<p>
+							<span className="truncatedText">{JSON.stringify(localDescription)}</span>
+							<button onClick={copyLocalDescription}>Copy local description</button>
+						</p>
+
+						<textarea cols={30} rows={10} ref={textRef} />
+						<button onClick={setRemoteDescription}>Set remote description</button>
+						<button onClick={addCandidate}>Add candidate</button>
+					</section>
+				)}
 			</main>
 		</div>
 	);
