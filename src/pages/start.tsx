@@ -26,7 +26,7 @@ export default function Start(): JSX.Element {
 
 		peerConnection.onicecandidate = (event) => {
 			if (event.candidate) {
-				console.log('candidate', event.candidate);
+				console.log(JSON.stringify(event.candidate));
 			}
 		};
 
@@ -78,7 +78,7 @@ export default function Start(): JSX.Element {
 	function addCandidate() {
 		if (textRef.current) {
 			const candidate = JSON.parse(textRef.current.value);
-			console.log({ candidate });
+			console.log(candidate);
 			connection.current?.addIceCandidate(new RTCIceCandidate(candidate));
 		}
 	}
@@ -95,7 +95,7 @@ export default function Start(): JSX.Element {
 				</section>
 				<section>
 					<video autoPlay ref={remoteVideoRef} />
-					<button onClick={setRemoteDescription}>Accept offer</button>
+					<button onClick={setRemoteDescription}>Set remote description</button>
 					<button onClick={createAnswer}>Create answer</button>
 				</section>
 			</main>
