@@ -32,6 +32,14 @@
 	padding: 1em;
 }
 
+.truncatedText {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: inline-block;
+	max-width: 300px;
+	max-height: 2em;
+}
+
 @media (min-width: 600px) {
 	.grid {
 		grid-template-columns: 1fr 1fr;

@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function Start(): JSX.Element {
 	const localVideoRef = useRef<HTMLVideoElement>(null);
 	const remoteVideoRef = useRef<HTMLVideoElement>(null);
 	const textRef = useRef<HTMLTextAreaElement>(null);
 	const connection = useRef<RTCPeerConnection>();
+	const [localDescription, setLocalDescription] = useState<RTCSessionDescriptionInit | undefined>();
 
 	useEffect(() => {
 		navigator.mediaDevices
@@ -49,6 +50,7 @@ export default function Start(): JSX.Element {
 			.then((offer) => {
 				console.log(JSON.stringify(offer));
 				connection.current?.setLocalDescription(offer);
+				setLocalDescription(offer);
 			})
 			.catch((error) => {
 				alert(error);
@@ -61,6 +63,7 @@ export default function Start(): JSX.Element {
 			.then((answer) => {
 				console.log(JSON.stringify(answer));
 				connection.current?.setLocalDescription(answer);
+				setLocalDescription(answer);
 			})
 			.catch((error) => {
 				alert(error);
@@ -83,6 +86,14 @@ export default function Start(): JSX.Element {
 		}
 	}
 
+	function copyLocalDescription() {
+		try {
+			navigator.clipboard.writeText(JSON.stringify(localDescription));
+		} catch (error) {
+			alert(error);
+		}
+	}
+
 	return (
 		<div className="container">
 			<main className="main">
@@ -90,13 +101,19 @@ export default function Start(): JSX.Element {
 				<section>
 					<video autoPlay ref={localVideoRef} />
 					<button onClick={createOffer}>Create offer</button>
-					<button onClick={addCandidate}>Add candidate</button>
+					<button onClick={createAnswer}>Create answer</button>
+
+					<p>
+						<span className="truncatedText">{JSON.stringify(localDescription)}</span>
+						<button onClick={copyLocalDescription}>Copy local description</button>
+					</p>
+
 					<textarea cols={30} rows={10} ref={textRef} />
+					<button onClick={setRemoteDescription}>Set remote description</button>
+					<button onClick={addCandidate}>Add candidate</button>
 				</section>
 				<section>
 					<video autoPlay ref={remoteVideoRef} />
-					<button onClick={setRemoteDescription}>Set remote description</button>
-					<button onClick={createAnswer}>Create answer</button>
 				</section>
 			</main>
 		</div>
