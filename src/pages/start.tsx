@@ -3,12 +3,15 @@ import { useEffect, useRef, useState } from 'react';
 export default function Start(): JSX.Element {
 	const localVideoRef = useRef<HTMLVideoElement>(null);
 	const remoteVideoRef = useRef<HTMLVideoElement>(null);
-	const textRef = useRef<HTMLTextAreaElement>(null);
+	const descriptionEl = useRef<HTMLTextAreaElement>(null);
+	const candidatesEl = useRef<HTMLTextAreaElement>(null);
 	const connection = useRef<RTCPeerConnection>();
+	const channel = useRef<RTCDataChannel>();
 	const [localDescription, setLocalDescription] = useState<RTCSessionDescriptionInit | undefined>();
 	const [localIceCandidates, setLocalIceCandidates] = useState<(RTCIceCandidate | null)[]>([]);
 	const [start, setStart] = useState(false);
 	const [join, setJoin] = useState(false);
+	const [messages, setMessages] = useState<string[]>([]);
 
 	useEffect(() => {
 		navigator.mediaDevices
@@ -30,13 +33,8 @@ export default function Start(): JSX.Element {
 
 		peerConnection.onicecandidate = (event) => {
 			if (event.candidate) {
-				console.log(JSON.stringify(event.candidate));
 				setLocalIceCandidates((candidates) => [...candidates, event.candidate]);
 			}
-		};
-
-		peerConnection.oniceconnectionstatechange = (event) => {
-			console.log('ice connection state change', event);
 		};
 
 		peerConnection.ontrack = (event) => {
@@ -48,11 +46,41 @@ export default function Start(): JSX.Element {
 		connection.current = peerConnection;
 	}, []);
 
+	function startChannel() {
+		if (connection.current) {
+			const dataChannel = connection.current.createDataChannel('channel');
+
+			dataChannel.onopen = () => console.log('Channel open');
+			dataChannel.onclose = () => console.log('Channel close');
+			dataChannel.onmessage = (event) =>
+				setMessages((messages) => [...messages, 'Them: ' + event.data]);
+
+			channel.current = dataChannel;
+			setStart(true);
+		}
+	}
+
+	function joinChannel() {
+		if (connection.current) {
+			connection.current.ondatachannel = (event) => {
+				const dataChannel = event.channel;
+
+				dataChannel.onopen = () => console.log('Channel open');
+				dataChannel.onclose = () => console.log('Channel close');
+				dataChannel.onmessage = (event) =>
+					setMessages((messages) => [...messages, 'Them: ' + event.data]);
+
+				channel.current = dataChannel;
+			};
+
+			setJoin(true);
+		}
+	}
+
 	function createOffer() {
 		connection.current
 			?.createOffer()
 			.then((offer) => {
-				console.log(JSON.stringify(offer));
 				connection.current?.setLocalDescription(offer);
 				setLocalDescription(offer);
 			})
@@ -65,7 +93,6 @@ export default function Start(): JSX.Element {
 		connection.current
 			?.createAnswer()
 			.then((answer) => {
-				console.log(JSON.stringify(answer));
 				connection.current?.setLocalDescription(answer);
 				setLocalDescription(answer);
 			})
@@ -75,17 +102,15 @@ export default function Start(): JSX.Element {
 	}
 
 	function setRemoteDescription() {
-		if (textRef.current) {
-			const description = JSON.parse(textRef.current.value);
-			console.log({ description });
+		if (descriptionEl.current) {
+			const description = JSON.parse(descriptionEl.current.value);
 			connection.current?.setRemoteDescription(description);
 		}
 	}
 
-	function addCandidate() {
-		if (textRef.current) {
-			const candidates = JSON.parse(textRef.current.value);
-			console.log(candidates);
+	function addCandidates() {
+		if (candidatesEl.current) {
+			const candidates = JSON.parse(candidatesEl.current.value);
 			candidates.forEach((candidate: RTCIceCandidate) => {
 				connection.current?.addIceCandidate(new RTCIceCandidate(candidate));
 			});
@@ -100,6 +125,15 @@ export default function Start(): JSX.Element {
 		}
 	}
 
+	function sendMessage() {
+		try {
+			channel.current?.send('Hello world');
+			setMessages((messages) => [...messages, 'Me: Hello world']);
+		} catch (error: unknown) {
+			console.error(error);
+		}
+	}
+
 	return (
 		<div className="container">
 			<main className="main">
@@ -108,8 +142,8 @@ export default function Start(): JSX.Element {
 
 				{!start && !join && (
 					<>
-						<button onClick={() => setStart(true)}>Start</button>
-						<button onClick={() => setJoin(true)}>Join</button>
+						<button onClick={startChannel}>Start</button>
+						<button onClick={joinChannel}>Join</button>
 					</>
 				)}
 
@@ -124,12 +158,17 @@ export default function Start(): JSX.Element {
 							</p>
 						)}
 
-						<textarea cols={30} rows={10} ref={textRef} />
+						<textarea cols={30} rows={10} ref={descriptionEl} />
 						<button onClick={setRemoteDescription}>Set remote description</button>
 					</>
 				)}
 
-				{start && <button onClick={addCandidate}>Add candidates</button>}
+				{start && (
+					<>
+						<textarea cols={30} rows={10} ref={candidatesEl} />
+						<button onClick={addCandidates}>Add candidates</button>
+					</>
+				)}
 
 				{join && (
 					<>
@@ -145,6 +184,13 @@ export default function Start(): JSX.Element {
 						)}
 					</>
 				)}
+
+				<button onClick={sendMessage}>Send message</button>
+				<ol>
+					{messages.map((message, index) => (
+						<li key={index}>{message}</li>
+					))}
+				</ol>
 			</main>
 		</div>
 	);
