@@ -6,6 +6,7 @@ export default function Start(): JSX.Element {
 	const textRef = useRef<HTMLTextAreaElement>(null);
 	const connection = useRef<RTCPeerConnection>();
 	const [localDescription, setLocalDescription] = useState<RTCSessionDescriptionInit | undefined>();
+	const [localIceCandidates, setLocalIceCandidates] = useState<(RTCIceCandidate | null)[]>([]);
 	const [start, setStart] = useState(false);
 	const [join, setJoin] = useState(false);
 
@@ -30,6 +31,7 @@ export default function Start(): JSX.Element {
 		peerConnection.onicecandidate = (event) => {
 			if (event.candidate) {
 				console.log(JSON.stringify(event.candidate));
+				setLocalIceCandidates((candidates) => [...candidates, event.candidate]);
 			}
 		};
 
@@ -82,15 +84,17 @@ export default function Start(): JSX.Element {
 
 	function addCandidate() {
 		if (textRef.current) {
-			const candidate = JSON.parse(textRef.current.value);
-			console.log(candidate);
-			connection.current?.addIceCandidate(new RTCIceCandidate(candidate));
+			const candidates = JSON.parse(textRef.current.value);
+			console.log(candidates);
+			candidates.forEach((candidate: RTCIceCandidate) => {
+				connection.current?.addIceCandidate(new RTCIceCandidate(candidate));
+			});
 		}
 	}
 
-	function copyLocalDescription() {
+	function copyAsText(data: unknown) {
 		try {
-			navigator.clipboard.writeText(JSON.stringify(localDescription));
+			navigator.clipboard.writeText(JSON.stringify(data));
 		} catch (error) {
 			alert(error);
 		}
@@ -111,19 +115,35 @@ export default function Start(): JSX.Element {
 
 				{start && <button onClick={createOffer}>Create offer</button>}
 
-				{join && <button onClick={createAnswer}>Create answer</button>}
-
 				{(start || join) && (
-					<section>
-						<p>
-							<span className="truncatedText">{JSON.stringify(localDescription)}</span>
-							<button onClick={copyLocalDescription}>Copy local description</button>
-						</p>
+					<>
+						{localDescription && (
+							<p>
+								<span className="truncatedText">{JSON.stringify(localDescription)}</span>
+								<button onClick={() => copyAsText(localDescription)}>Copy local description</button>
+							</p>
+						)}
 
 						<textarea cols={30} rows={10} ref={textRef} />
 						<button onClick={setRemoteDescription}>Set remote description</button>
-						<button onClick={addCandidate}>Add candidate</button>
-					</section>
+					</>
+				)}
+
+				{start && <button onClick={addCandidate}>Add candidates</button>}
+
+				{join && (
+					<>
+						<button onClick={createAnswer}>Create answer</button>
+
+						{localIceCandidates && (
+							<p>
+								<span className="truncatedText">{JSON.stringify(localIceCandidates)}</span>
+								<button onClick={() => copyAsText(localIceCandidates)}>
+									Copy local ICE candidates
+								</button>
+							</p>
+						)}
+					</>
 				)}
 			</main>
 		</div>
