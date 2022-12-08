@@ -1,8 +1,9 @@
 .Jamophone {
 	display: grid;
 	grid-auto-flow: column;
-	height: 90vh;
-	width: 100%;
-	align-items: center;
-	gap: 3em;
+}
+
+.Connection {
+	display: grid;
+	gap: 1em;
 }
