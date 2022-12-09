@@ -13,9 +13,17 @@ export function Jamophone(): JSX.Element {
 	const [start, setStart] = useState(false);
 	const [join, setJoin] = useState(false);
 	const [notes, setNotes] = useState<string[]>([]);
+	const servers = {
+		iceServers: [
+			{
+				urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
+			},
+		],
+		iceCandidatePoolSize: 10,
+	};
 
 	useEffect(() => {
-		const peerConnection = new RTCPeerConnection();
+		const peerConnection = new RTCPeerConnection(servers);
 
 		peerConnection.onicecandidate = (event) => {
 			if (event.candidate) {
